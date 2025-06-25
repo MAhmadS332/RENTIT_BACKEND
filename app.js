@@ -9,6 +9,9 @@ const { listingRouter } = require("./routes/listings-routes");
 const { bookingRouter } = require("./routes/bookings-routes");
 const { usersRouter } = require("./routes/users-routes");
 
+const PORT = process.env.PORT 
+const MONGODB_URI = process.env.MONGODB_URI
+
 app.use(cors());
 
 app.use(express.json());
@@ -37,12 +40,13 @@ app.use((err, req, res, next) => {
   res.status(500 || err.code).json({ message: err.message });
 });
 
+app.listen(PORT, () => {
+  console.log("Server is running on port 5000");
+});
+
 mongoose
-  .connect(process.env.MONGODB_URI)
+  .connect(MONGODB_URI)
   .then(() => {
-    app.listen(5000, () => {
-      console.log("Server is running on port 5000");
-    });
     console.log("Connected to the database");
   })
   .catch((err) => {
