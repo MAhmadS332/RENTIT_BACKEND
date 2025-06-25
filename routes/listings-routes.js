@@ -16,17 +16,17 @@ router.use(jwt);
 router.get("/user/:id", listingController.getListingByUserId);
 router.post(
   "/",
-  FileUpload.single("img"),
-  [
-    check("title").notEmpty(),
-    check("location").notEmpty(),
-    check("type").notEmpty(),
-    // check("info.guests").notEmpty(),
-    // check("info.bedrooms").notEmpty(),
-    // check("info.bathrooms").notEmpty(),
-    check("pricePerNight").notEmpty(),
-    check("rating").notEmpty(),
-  ],
+  // FileUpload.single("img"),
+  // [
+  //   check("title").notEmpty(),
+  //   check("location").notEmpty(),
+  //   check("type").notEmpty(),
+  //   // check("info.guests").notEmpty(),
+  //   // check("info.bedrooms").notEmpty(),
+  //   // check("info.bathrooms").notEmpty(),
+  //   check("pricePerNight").notEmpty(),
+  //   check("rating").notEmpty(),
+  // ],
   listingController.createListing
 );
 
