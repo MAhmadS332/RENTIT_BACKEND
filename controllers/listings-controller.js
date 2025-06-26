@@ -319,7 +319,10 @@ const searchListings = async (req, res, next) => {
       listingsData = await Listing.find({});
     } else {
       listingsData = await Listing.find({
-        location: { $regex: query, $options: "i" },
+        $or: [
+          { title: { $regex: query, $options: "i" } },
+          { location: { $regex: query, $options: "i" } },
+        ],
       });
     }
     res
