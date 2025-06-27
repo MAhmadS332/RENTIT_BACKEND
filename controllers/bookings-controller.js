@@ -127,8 +127,15 @@ const removeBooking = async (req, res, next) => {
       return next(error);
     }
 
-    const user = await User.findById(req.userId.id).populate("bookings");
+    const session = await mongoose.startSession();
+    session.startTransaction();
+
+    const user = await User.findById(req.userId.id)
+      .session(session)
+      .populate("bookings");
     if (!user) {
+      await session.abortTransaction();
+      session.endSession();
       const error = {
         message: "Could not find a user for the provided id.",
         code: 404,
@@ -137,6 +144,8 @@ const removeBooking = async (req, res, next) => {
     }
 
     if (booking.bookingUser.toString() !== req.userId.id) {
+      await session.abortTransaction();
+      session.endSession();
       const error = {
         message: "Unauthorized.",
         code: 401,
@@ -144,11 +153,10 @@ const removeBooking = async (req, res, next) => {
       return next(error);
     }
 
-    const session = await mongoose.startSession();
-    session.startTransaction();
     await user.bookings.pull(booking);
     await user.save({ session: session });
-    await booking.remove({ session: session });
+    await booking.deleteOne({ _id: id }, { session: session });
+
     await session.commitTransaction();
     session.endSession();
   } catch (err) {
@@ -199,8 +207,15 @@ const removeBookingByAdmin = async (req, res, next) => {
       return next(error);
     }
 
-    const user = await User.findById(booking.bookingUser).populate("bookings");
+    const session = await mongoose.startSession();
+    session.startTransaction();
+
+    const user = await User.findById(booking.bookingUser)
+      .session(session)
+      .populate("bookings");
     if (!user) {
+      await session.abortTransaction();
+      session.endSession();
       const error = {
         message: "Could not find a user for the provided id.",
         code: 404,
@@ -208,17 +223,15 @@ const removeBookingByAdmin = async (req, res, next) => {
       return next(error);
     }
 
-    const session = await mongoose.startSession();
-    session.startTransaction();
     await user.bookings.pull(booking);
     await user.save({ session: session });
-    await booking.deleteOne({_id: id},{ session: session });
+    await booking.deleteOne({ _id: id }, { session: session });
     await session.commitTransaction();
     session.endSession();
 
     res.json({ message: "Booking removed." }).status(200);
   } catch (err) {
-    console.log(err)
+    console.log(err);
     const error = {
       message: "Error removing booking.",
       code: 500,
